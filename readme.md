@@ -17,7 +17,9 @@ via the `win32com` windows library.
 Google Calendar is handled via the Google API, which must be properly
 setup and the credentials saved to a local file named 
 `credentials.json`. During first use, you'll be requested to log in,
-which will create a token file `token.json`.
+which will create a token file `token.json`. To get started with Google
+API, refer to the [Google Python
+API](https://developers.google.com/calendar/api/quickstart/python).
 
 ## App
 
