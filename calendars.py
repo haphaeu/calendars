@@ -66,7 +66,7 @@ class OutlookCalendar:
         appt.Start = f'{start}'
         appt.Subject = subject
         appt.Duration = 60
-        appt.ReminderMinutesBeforeStart = 60
+        appt.ReminderMinutesBeforeStart = 30
         appt.BusyStatus = 3 ## Out of the Office
         appt.Categories = 'Private'
         appt.Save()

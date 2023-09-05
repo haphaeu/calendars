@@ -4,8 +4,8 @@ from calendars import OutlookCalendar, GoogleCalendar, week_to_days
 
 WEEKS = [{
     # Weeks when wife is late-shift, I do the pick-up at school
-    'weeks': [35, 36, 38, 40, 44, 45, 47, 49, 50],
-    'time': '15:22',
+    'weeks': [36, 38, 40, 44, 45, 47, 49, 50],
+    'time': '15:30',
     'subject': 'Buscar da escola',
     },{
     # Weeks when she's early, I do the drop-off
@@ -59,6 +59,7 @@ if __name__ == '__main__':
         action = sys.argv[1]
     except IndexError:
         print('Missing argument.')
+        print(f'Usage: python {sys.argv[0]} [add|delete] doit')
         raise SystemExit
     if action not in ('add', 'delete'):
         print('Error - missing action: "add" or "delete"')
