@@ -52,6 +52,11 @@ def week_to_days(week_num, time='00:00', year=2023):
 
 
 class OutlookCalendar:
+    """
+    API ref for AppointmentItems:
+    (Dispatch("Outlook.Application").CreateItem(1)):
+    https://learn.microsoft.com/en-us/office/vba/api/outlook.appointmentitem
+    """
 
     def __init__(self):
         self.outlook = Dispatch("Outlook.Application")
@@ -72,7 +77,7 @@ class OutlookCalendar:
         appt.Save()
         #appt.Send()  #??
 
-    def delete_events(self, from_date, subject, dry=True):
+    def delete_events(self, from_date, to_date, subject, dry=True):
 
         cal = self.outlook.GetNamespace("MAPI").GetDefaultFolder(9) 
         appointments = cal.Items
@@ -81,7 +86,8 @@ class OutlookCalendar:
         for appt in appointments:
             if (
                 appt.Subject == subject and 
-                appt.Start >= TZ.localize(from_date)
+                appt.Start >= TZ.localize(from_date) and
+                appt.Start <= TZ.localize(to_date)
             ):
                 appts_2b_deleted.append(appt)
                 
@@ -109,6 +115,10 @@ class OutlookCalendar:
 
 
 class GoogleCalendar:
+    """
+    API reference:
+    https://developers.google.com/calendar/api/v3/reference/events
+    """
 
     def __init__(self):
         # If modifying these scopes, delete the file token.json.
@@ -178,16 +188,18 @@ class GoogleCalendar:
         except HttpError as error:
             print('An error occurred: %s' % error)
 
-    def delete_events(self, from_date, subject, dry=True):
+    def delete_events(self, from_date, to_date, subject, dry=True):
         """Delete all events from `from_date` containing `subject`"""
 
         from_date = from_date.astimezone().isoformat()
+        to_date = to_date.astimezone().isoformat()
 
         try:
             service = build('calendar', 'v3', credentials=self.creds)
 
+            # https://developers.google.com/calendar/api/v3/reference/events/list
             events_result = service.events().list(
-                calendarId='primary', timeMin=from_date,
+                calendarId='primary', timeMin=from_date, timeMax=to_date,
                 maxResults=999, singleEvents=True,
                 orderBy='startTime').execute()
 
