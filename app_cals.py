@@ -4,16 +4,22 @@ from calendars import OutlookCalendar, GoogleCalendar, week_to_days
 
 WEEKS = [{
     # Weeks when wife is late-shift, I do the pick-up at school
-    'weeks': [36, 38, 40, 44, 45, 47, 49, 50],
+    'weeks': [36, 38, 39, 40, 44, 45, 47, 49, 50],
     'time': '15:30',
     'subject': 'Buscar da escola',
     },{
     # Weeks when she's early, I do the drop-off
-    'weeks': [37, 39, 42, 43, 46, 48],
+    'weeks': [37, 42, 43, 46, 48],
     'time': '07:30',
     'subject': 'Levar pra escola',
     }]
 
+
+##WEEKS = [{
+##    'weeks': [39],
+##    'time': '15:30',
+##    'subject': 'Buscar da escola',
+##    }]
 
 OUTLOOK_CALENDAR = OutlookCalendar()
 GOOGLE_CALENDAR = GoogleCalendar()
@@ -22,10 +28,11 @@ GOOGLE_CALENDAR = GoogleCalendar()
 def clear_all(dry=True):
 
     for week in WEEKS:
-        start_date = week_to_days(min(week['weeks']))[0]
+        start_date = week_to_days(min(week['weeks']), time='00:00')[0]
+        end_date = week_to_days(min(week['weeks']), time='23:59')[-1]
         subject = week['subject']
-        OUTLOOK_CALENDAR.delete_events(start_date, subject, dry)
-        GOOGLE_CALENDAR.delete_events(start_date, subject, dry)
+        OUTLOOK_CALENDAR.delete_events(start_date, end_date, subject, dry)
+        GOOGLE_CALENDAR.delete_events(start_date, end_date, subject, dry)
 
 
 def add_all(dry=True):
