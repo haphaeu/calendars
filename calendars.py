@@ -61,7 +61,7 @@ class OutlookCalendar:
     def __init__(self):
         self.outlook = Dispatch("Outlook.Application")
 
-    def create_event(self, start, subject):
+    def create_event(self, start, subject, duration=60):
         """Create an appointment in Outlook calendar.
         
         start: datetime object
@@ -70,7 +70,7 @@ class OutlookCalendar:
         appt = self.outlook.CreateItem(1) # AppointmentItem
         appt.Start = f'{start}'
         appt.Subject = subject
-        appt.Duration = 60
+        appt.Duration = duration
         appt.ReminderMinutesBeforeStart = 30
         appt.BusyStatus = 3 ## Out of the Office
         appt.Categories = 'Private'
@@ -120,9 +120,16 @@ class GoogleCalendar:
     https://developers.google.com/calendar/api/v3/reference/events
     """
 
-    def __init__(self):
+    def __init__(self, calendarId='primary'):
+        """To switch to other calendars, change `calendarId` to:
+            Primary: 'primary'
+            Treino: 'sjor2ciqns5rju6bd7u6tlis8k@group.calendar.google.com'
+            Escalada: "ea85e0d13649f36af78eea1c526911bc1f375a432b876db9e50eada3fed2f765@group.calendar.google.com"
+            BISS: "vsm0v2gr6ln7v0uqrubhje302k@group.calendar.google.com"
+        """
         # If modifying these scopes, delete the file token.json.
         self.SCOPES = ['https://www.googleapis.com/auth/calendar']
+        self.calendarId = calendarId
         self.creds = self._get_credentials()
 
     def _get_credentials(self):
@@ -181,7 +188,7 @@ class GoogleCalendar:
         try:
             service = build('calendar', 'v3', credentials=self.creds)
             body = self.format_event_body(start, subject)
-            event = service.events().insert(calendarId='primary', 
+            event = service.events().insert(calendarId=self.calendarId, 
                                             body=body).execute()
             print('Event created: %s' % (event.get('htmlLink')))
 
@@ -199,7 +206,8 @@ class GoogleCalendar:
 
             # https://developers.google.com/calendar/api/v3/reference/events/list
             events_result = service.events().list(
-                calendarId='primary', timeMin=from_date, timeMax=to_date,
+                calendarId=self.calendarId, 
+                timeMin=from_date, timeMax=to_date,
                 maxResults=999, singleEvents=True,
                 orderBy='startTime').execute()
 
@@ -232,7 +240,7 @@ class GoogleCalendar:
             if answer == 'yes':
                 for event in events_2b_deleted:
                     eventId = event['id']
-                    service.events().delete(calendarId='primary', 
+                    service.events().delete(calendarId=self.calendarId, 
                                             eventId=eventId).execute()
 
         except HttpError as error:
