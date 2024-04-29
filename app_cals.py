@@ -1,25 +1,19 @@
 import sys
 from calendars import OutlookCalendar, GoogleCalendar, week_to_days
 
+YEAR = 2024
 
 WEEKS = [{
-    # Weeks when wife is late-shift, I do the pick-up at school
-    'weeks': [36, 38, 39, 40, 44, 45, 47, 49, 50],
+    # Weeks when she is late-shift, I do the pick-up at school
+    'weeks': [18, 20, 23, 25],
     'time': '15:30',
     'subject': 'Buscar da escola',
     },{
     # Weeks when she's early, I do the drop-off
-    'weeks': [37, 42, 43, 46, 48],
+    'weeks': [19, 21, 22, 24],
     'time': '07:30',
     'subject': 'Levar pra escola',
     }]
-
-
-##WEEKS = [{
-##    'weeks': [39],
-##    'time': '15:30',
-##    'subject': 'Buscar da escola',
-##    }]
 
 OUTLOOK_CALENDAR = OutlookCalendar()
 GOOGLE_CALENDAR = GoogleCalendar()
@@ -52,7 +46,7 @@ def add_all(dry=True):
         
         for week_num in week_nums:
             print(f'Week {week_num}')
-            days = week_to_days(week_num, time)
+            days = week_to_days(week_num, time, year=YEAR)
             print([f'{d}' for d in days], end='')
             if not dry:
                 for day in days:
