@@ -16,12 +16,13 @@ method `delete_events`.
  - [x] Add morning drop off events
  - [x] Create a method to add events to Google Calendar
  - [x] Delete events from Good Calendar
- - [ ] Split lib (purpose agnostic) and app (pick-up, drop-off)
- - [ ] 
+ - [x] Split lib (purpose agnostic) and app (pick-up, drop-off)
+ - [x] Create an abstract parent class (interface) for Calendar 
 
 """
 import pytz
 import os.path
+from abc import ABC, abstractmethod 
 from datetime import datetime as dt
 from datetime import timedelta
 from win32com.client import Dispatch
@@ -51,7 +52,33 @@ def week_to_days(week_num, time='00:00', year=2023):
     ]
 
 
-class OutlookCalendar:
+class Calendar(ABC):
+    """
+    Abstract class for a calendar interface.
+    """
+    def __init__(self):
+        pass
+        
+    @abstractmethod
+    def create_event(self, 
+                     start: dt, 
+                     subject: str, 
+                     duration: int,
+                     ):
+        """Create a calendar event."""
+        raise NotImplementedError
+    
+    @abstractmethod
+    def delete_events(self, 
+                      from_date: dt, 
+                      to_date: dt, 
+                      subject: str, 
+                      dry: bool,
+                      ):
+        """Delete calendar events within a date range."""
+        raise NotImplementedError
+
+class OutlookCalendar(Calendar):
     """
     API ref for AppointmentItems:
     (Dispatch("Outlook.Application").CreateItem(1)):
@@ -59,6 +86,7 @@ class OutlookCalendar:
     """
 
     def __init__(self):
+        super().__init__()
         self.outlook = Dispatch("Outlook.Application")
 
     def create_event(self, start, subject, duration=60):
@@ -114,7 +142,7 @@ class OutlookCalendar:
         print('Done.')
 
 
-class GoogleCalendar:
+class GoogleCalendar(Calendar):
     """
     API reference:
     https://developers.google.com/calendar/api/v3/reference/events
@@ -127,6 +155,7 @@ class GoogleCalendar:
             Escalada: "ea85e0d13649f36af78eea1c526911bc1f375a432b876db9e50eada3fed2f765@group.calendar.google.com"
             BISS: "vsm0v2gr6ln7v0uqrubhje302k@group.calendar.google.com"
         """
+        super().__init__()
         # If modifying these scopes, delete the file token.json.
         self.SCOPES = ['https://www.googleapis.com/auth/calendar']
         self.calendarId = calendarId
@@ -154,14 +183,14 @@ class GoogleCalendar:
 
         return creds
 
-    def format_event_body(self, start, subject):
+    def format_event_body(self, start, subject, duration):
         """Return a calendar event body.
         
         start: datetime object
         subject: string
         """
 
-        end = start + timedelta(hours=1)
+        end = start + timedelta(minutes=duration)
         
         body = {
           'summary': f'{subject}',
@@ -179,7 +208,7 @@ class GoogleCalendar:
 
         return body
 
-    def create_event(self, start, subject):
+    def create_event(self, start, subject, duration=60):
         """Add an event to the calendar.
         
         start: datetime object
@@ -187,7 +216,7 @@ class GoogleCalendar:
         """
         try:
             service = build('calendar', 'v3', credentials=self.creds)
-            body = self.format_event_body(start, subject)
+            body = self.format_event_body(start, subject, duration)
             event = service.events().insert(calendarId=self.calendarId, 
                                             body=body).execute()
             print('Event created: %s' % (event.get('htmlLink')))
