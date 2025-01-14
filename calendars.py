@@ -46,7 +46,7 @@ def week_to_days(week_num, time='00:00', year=2023):
     """
     strtime = f'{year:d}-W{week_num:d}-1 {time}'
     return [
-        dt.strptime(strtime, '%Y-W%W-%w %H:%M')
+        dt.strptime(strtime, '%G-W%V-%w %H:%M')
         + timedelta(days=offset)
         for offset in range(5)
     ]
